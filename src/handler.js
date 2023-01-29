@@ -13,23 +13,17 @@ const addBookHandler = (request, h) => {
 
   try {
     if (name === undefined) {
-      const response = h.response({
+      return h.response({
         status: 'fail',
         message: 'Gagal menambahkan buku. Mohon isi nama buku',
-      });
-
-      response.code(400);
-      return response;
+      }).code(400);
     }
 
     if (readPage > pageCount) {
-      const response = h.response({
+      return h.response({
         status: 'fail',
         message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
-      });
-
-      response.code(400);
-      return response;
+      }).code(400);
     }
   } catch (error) {
     return h.response({
@@ -99,7 +93,7 @@ const getAllBooksHandler = (request, h) => {
   }).code(200);
 };
 
-const getDetailBook = (request, h) => {
+const getDetailBookHandler = (request, h) => {
   const { bookId } = request.params;
   const detail = arrayBooks.find((book) => book.id === bookId);
 
@@ -118,7 +112,7 @@ const getDetailBook = (request, h) => {
   }).code(404);
 };
 
-const editBook = (request, h) => {
+const editBookHandler = (request, h) => {
   const { bookId } = request.params;
   const {
     name, year, author, summary, publisher, pageCount, readPage, reading,
@@ -169,7 +163,7 @@ const editBook = (request, h) => {
   }).code(200);
 };
 
-const deleteBook = (request, h) => {
+const deleteBookHandler = (request, h) => {
   const { bookId } = request.params;
   const index = arrayBooks.findIndex((b) => b.id === bookId);
 
@@ -188,5 +182,5 @@ const deleteBook = (request, h) => {
 };
 
 module.exports = {
-  addBookHandler, getAllBooksHandler, getDetailBook, editBook, deleteBook,
+  addBookHandler, getAllBooksHandler, getDetailBookHandler, editBookHandler, deleteBookHandler,
 };
