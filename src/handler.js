@@ -10,12 +10,9 @@ const addBookHandler = (request, h) => {
   const finished = (pageCount === readPage);
   const insertedAt = new Date().toISOString();
   const updatedAt = insertedAt;
-  const isName = name !== undefined;
-  // eslint-disable-next-line camelcase
-  const page = !((readPage > pageCount));
 
   try {
-    if (!isName) {
+    if (name === undefined) {
       const response = h.response({
         status: 'fail',
         message: 'Gagal menambahkan buku. Mohon isi nama buku',
@@ -25,8 +22,7 @@ const addBookHandler = (request, h) => {
       return response;
     }
 
-    // eslint-disable-next-line camelcase
-    if (!page) {
+    if (readPage > pageCount) {
       const response = h.response({
         status: 'fail',
         message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
@@ -73,38 +69,34 @@ const addBookHandler = (request, h) => {
 
 const getAllBooksHandler = (request, h) => {
   const { name, reading, finished } = request.query;
-  const books = arrayBooks.map((book) => ({
+  let filteredBook = arrayBooks;
+  if (name !== undefined) {
+    filteredBook = filteredBook
+      .filter((book) => book.name.toLowerCase().includes(name.toLowerCase()));
+  }
+
+  if (reading !== undefined) {
+    filteredBook = filteredBook
+      .filter((book) => book.reading === (reading === '1'));
+  }
+
+  if (finished !== undefined) {
+    filteredBook = filteredBook
+      .filter((book) => book.finished === (finished === '1'));
+  }
+
+  const books = filteredBook.map((book) => ({
     id: book.id,
     name: book.name,
     publisher: book.publisher,
   }));
 
-  let filteredBook = books;
-  if (name) {
-    // eslint-disable-next-line no-unused-vars
-    filteredBook = books.filter((b) => b.name.toLowerCase().includes(name.toLowerCase()));
-  }
-
-  if (reading) {
-    // eslint-disable-next-line no-unused-vars
-    filteredBook = books.filter((b) => b.reading === (reading === 1));
-    // b.reading === reading
-  }
-
-  if (finished) {
-    // eslint-disable-next-line no-unused-vars
-    filteredBook = books.filter((b) => b.finished === (finished === 1));
-    // b.finished === finished
-  }
-
-  const response = h.response({
+  return h.response({
     status: 'success',
     data: {
-      books: filteredBook,
+      books,
     },
-  });
-  response.code(200);
-  return response;
+  }).code(200);
 };
 
 const getDetailBook = (request, h) => {
@@ -197,21 +189,21 @@ const deleteBook = (request, h) => {
   const { id } = request.params;
   const index = arrayBooks.findIndex((b) => b.bookId === id);
 
-  if (index === -1) {
+  if (index !== -1) {
+    arrayBooks.splice(index, 1);
     const response = h.response({
-      status: 'fail',
-      message: 'Buku gagal dihapus. Id tidak ditemukan',
+      status: 'success',
+      message: 'Buku berhasil dihapus',
     });
-    response.code(404);
+    response.code(200);
     return response;
   }
 
-  arrayBooks.splice(index, 1);
   const response = h.response({
-    status: 'success',
-    message: 'Buku berhasil dihapus',
+    status: 'fail',
+    message: 'Buku gagal dihapus. Id tidak ditemukan',
   });
-  response.code(200);
+  response.code(404);
   return response;
 };
 
